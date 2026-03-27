@@ -7,6 +7,8 @@ from app.routers import appointments
 from app.routers import ai_search
 from app.routers import map
 from app.routers import doctors
+from app.database import engine
+from app import models
 
 app = FastAPI()
 
@@ -30,3 +32,4 @@ app.include_router(map.router)
 def home():
     return {"message": "AI hospital backend is running and database connected"}
 
+models.Base.metadata.create_all(bind=engine)
