@@ -10,6 +10,7 @@ from app.routers import doctors
 from app.database import engine
 from app import models
 from app.routers import seed
+from app.routers import debug
 
 app = FastAPI()
 
@@ -29,6 +30,7 @@ app.include_router(services.router)
 app.include_router(appointments.router)
 app.include_router(map.router)
 app.include_router(seed.router)
+app.include_router(debug.router)
 
 @app.get("/")
 def home():
