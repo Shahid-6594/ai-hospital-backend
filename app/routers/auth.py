@@ -9,8 +9,7 @@ from app.utils.jwt_handler import create_access_token
 
 router = APIRouter()
 
-
-# Database dependency
+# DB
 def get_db():
     db = SessionLocal()
     try:
@@ -18,8 +17,7 @@ def get_db():
     finally:
         db.close()
 
-
-# Request Schemas
+# Request Models
 class RegisterRequest(BaseModel):
     name: str
     age: int
@@ -28,24 +26,13 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
 
-
 class LoginRequest(BaseModel):
     email: str
     password: str
 
 
-# Register API
 @router.post("/register")
 def register_patient(data: RegisterRequest, db: Session = Depends(get_db)):
-
-    # Check if email already exists
-    existing_user = db.query(models.Patient).filter(
-        models.Patient.email == data.email
-    ).first()
-
-    if existing_user:
-        return {"error": "Email already registered"}
-
     hashed = hash_password(data.password)
 
     patient = models.Patient(
@@ -63,10 +50,8 @@ def register_patient(data: RegisterRequest, db: Session = Depends(get_db)):
     return {"message": "Patient registered successfully"}
 
 
-# Login API
 @router.post("/login")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
-
     patient = db.query(models.Patient).filter(
         models.Patient.email == data.email
     ).first()
