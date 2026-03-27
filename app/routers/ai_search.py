@@ -32,13 +32,21 @@ def ai_search(data: dict, db: Session = Depends(get_db)):
     query = data["query"]
     user_lat = data["user_lat"]
     user_lon = data["user_lon"]
+    print("USER QUERY:", query)
 
+    parsed = parse_query(query)
+    print("PARSED:", parsed)
+
+    service = parsed["service"]
+    print("SERVICE:", service)
     parsed = parse_query(query)
 
     service = parsed["service"]
 
     if not service:
         return []
+    
+
 
     results = (
         db.query(
@@ -64,6 +72,7 @@ def ai_search(data: dict, db: Session = Depends(get_db)):
             models.Hospital.longitude
         )
         .all()
+        
     )
 
     response = []
