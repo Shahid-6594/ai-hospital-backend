@@ -3,13 +3,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-DATABASE_URL_INTERNAL = os.getenv("DATABASE_URL_INTERNAL")
 
-# Use internal DB when on Render, else external for local
-if DATABASE_URL_INTERNAL:
-    engine = create_engine(DATABASE_URL_INTERNAL)
-else:
-    engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
