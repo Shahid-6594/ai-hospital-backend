@@ -76,7 +76,7 @@ class Appointment(Base):
 
 
 class Review(Base):
-    __tablename__ = "reviews"
+    __tablename__ = "review"
 
     review_id = Column(Integer, primary_key=True, index=True)
     hospital_id = Column(Integer, ForeignKey("hospitals.hospital_id"))
