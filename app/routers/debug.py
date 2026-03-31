@@ -19,3 +19,7 @@ def debug_hospitals(db: Session = Depends(get_db)):
 def debug_doctors(db: Session = Depends(get_db)):
     doctors = db.query(models.Doctor).all()
     return doctors
+@router.get("/debug/reviews")
+def get_reviews(db: Session = Depends(get_db)):
+    reviews= db.query(models.Review).all()
+    return reviews
