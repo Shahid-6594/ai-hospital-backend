@@ -99,20 +99,41 @@ def seed_data(db: Session = Depends(get_db)):
     # -----------------------
     # 5. ADD RATINGS
     # -----------------------
-    for h in hospitals:
-        review_exists = db.query(models.Review).filter(
-            models.Review.hospital_id == h.hospital_id
-        ).first()
+    # -----------------------
+    # 5. ADD RATINGS (FIXED)
+    # -----------------------
+    ratings_data = {
+        "AIIMS Delhi": 4.7,
+        "Fortis Hospital": 4.5,
+        "Apollo Hospital": 4.6,
+        "Max Super Speciality Hospital": 4.4,
+        "Safdarjung Hospital": 3.9,
+        "BLK Max Hospital": 4.3,
+        "Medanta Hospital": 4.6,
+        "Artemis Hospital": 4.2,
+        "Paras Hospital": 4.0,
+        "Columbia Asia Hospital": 4.1,
+        "City Hospital": 3.8,
+        "Metro Hospital": 3.9
+    }
 
-        if not review_exists:
-            for i in range(3):  # 3 reviews per hospital
-                review = models.Review(
-                    hospital_id=h.hospital_id,
-                    rating=random.uniform(3.5, 5.0),
-                    review_text="Good hospital"
-                )
-                db.add(review)
+    for h in hospitals:
+         existing_review = db.query(models.Review).filter(
+            models.Review.hospital_id == h.hospital_id
+
+        ).first()
+         
+
+         if not existing_review:
+            rating_value = ratings_data.get(h.name, 4.0)
+
+            review = models.Review(
+                hospital_id=h.hospital_id,
+                rating=rating_value,
+                review_text="Good hospital"
+            )
+            db.add(review)
 
     db.commit()
-
+    
     return {"message": "Database seeded successfully with hospitals, services, doctors, slots, and reviews"}
