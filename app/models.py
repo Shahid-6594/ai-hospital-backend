@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Text, TIMESTAMP
-from sqlalchemy.orm import relationship
 from app.database import Base
 
 
@@ -61,7 +60,7 @@ class Patient(Base):
     age = Column(Integer)
     gender = Column(String)
     phone = Column(String)
-    email = Column(String)
+    email = Column(String, unique=True)
     password_hash = Column(String)
 
 
@@ -80,6 +79,5 @@ class Review(Base):
 
     review_id = Column(Integer, primary_key=True, index=True)
     hospital_id = Column(Integer, ForeignKey("hospitals.hospital_id"))
-    patient_id = Column(Integer, ForeignKey("patients.patient_id"))
     rating = Column(Integer)
     comment = Column(Text)

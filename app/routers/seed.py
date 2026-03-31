@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.database import get_db
 from app import models
-import random
 
 router = APIRouter()
 
@@ -12,7 +11,7 @@ def seed_data(db: Session = Depends(get_db)):
     print("SEED FUNCTION CALLED")
 
     # -----------------------
-    # 1. ADD HOSPITALS
+    # 1. HOSPITALS
     # -----------------------
     hospital_data = [
         ("AIIMS Delhi", "Delhi", 28.5672, 77.2100),
@@ -27,50 +26,36 @@ def seed_data(db: Session = Depends(get_db)):
         ("Columbia Asia Hospital", "Gurgaon", 28.4560, 77.0720),
     ]
 
-    existing = db.query(models.Hospital).all()
-    existing_names = [h.name for h in existing]
-
     for name, city, lat, lon in hospital_data:
-        if name not in existing_names:
-            db.add(models.Hospital(
-                name=name,
-                city=city,
-                latitude=lat,
-                longitude=lon
-            ))
+        exists = db.query(models.Hospital).filter(models.Hospital.name == name).first()
+        if not exists:
+            db.add(models.Hospital(name=name, city=city, latitude=lat, longitude=lon))
 
     db.commit()
 
     hospitals = db.query(models.Hospital).all()
 
     # -----------------------
-    # 2. ADD SERVICES
+    # 2. SERVICES
     # -----------------------
     for h in hospitals:
-        existing_services = db.query(models.Service).filter(
-            models.Service.hospital_id == h.hospital_id
-        ).first()
-
-        if not existing_services:
-            services = [
+        exists = db.query(models.Service).filter(models.Service.hospital_id == h.hospital_id).first()
+        if not exists:
+            db.add_all([
                 models.Service(hospital_id=h.hospital_id, service_name="blood test", price=400 + h.hospital_id * 50),
                 models.Service(hospital_id=h.hospital_id, service_name="x ray", price=700 + h.hospital_id * 60),
                 models.Service(hospital_id=h.hospital_id, service_name="mri", price=2500 + h.hospital_id * 100),
                 models.Service(hospital_id=h.hospital_id, service_name="ct scan", price=2000 + h.hospital_id * 90),
-            ]
-            db.add_all(services)
-
+            ])
     db.commit()
 
     # -----------------------
-    # 3. ADD DOCTORS + FEES
+    # 3. DOCTORS + SLOTS
     # -----------------------
     for h in hospitals:
-        doctor_exists = db.query(models.Doctor).filter(
-            models.Doctor.hospital_id == h.hospital_id
-        ).first()
+        doctor = db.query(models.Doctor).filter(models.Doctor.hospital_id == h.hospital_id).first()
 
-        if not doctor_exists:
+        if not doctor:
             doctor = models.Doctor(
                 name=f"Dr. {h.name.split()[0]}",
                 hospital_id=h.hospital_id,
@@ -80,11 +65,8 @@ def seed_data(db: Session = Depends(get_db)):
             db.commit()
             db.refresh(doctor)
 
-            # -----------------------
-            # 4. ADD SLOTS
-            # -----------------------
-            slots = []
             base_time = datetime(2026, 4, 10, 10, 0)
+            slots = []
 
             for i in range(5):
                 slots.append(models.DoctorSlot(
@@ -97,7 +79,7 @@ def seed_data(db: Session = Depends(get_db)):
             db.commit()
 
     # -----------------------
-    # 5. ADD RATINGS (FIXED)
+    # 4. REVIEWS
     # -----------------------
     ratings_data = {
         "AIIMS Delhi": 4.7,
@@ -109,31 +91,18 @@ def seed_data(db: Session = Depends(get_db)):
         "Medanta Hospital": 4.6,
         "Artemis Hospital": 4.2,
         "Paras Hospital": 4.0,
-        "Columbia Asia Hospital": 4.1,
-       "City Hospital": 3.8,
-       "Metro Hospital": 3.9
+        "Columbia Asia Hospital": 4.1
     }
-    print("Hospital count :",len(hospitals))
 
     for h in hospitals:
-        # Check if review already exists
-        review_exists = db.query(models.Review).filter(
-            models.Review.hospital_id == h.hospital_id
-        ).first()
-
-        if not review_exists:
-            print("Adding reviews for :",h.name)
-            rating_value = ratings_data.get(h.name, 4.0)
-
-            new_review = models.Review(
+        review = db.query(models.Review).filter(models.Review.hospital_id == h.hospital_id).first()
+        if not review:
+            db.add(models.Review(
                 hospital_id=h.hospital_id,
-                rating=rating_value,
-                review_text="Good hospital"
-            )
+                rating=ratings_data.get(h.name, 4),
+                comment="Good hospital"
+            ))
 
-            db.add(new_review)
-
-    # IMPORTANT: commit AFTER loop
     db.commit()
-    
-    return {"message": "Database seeded successfully with hospitals, services, doctors, slots, and reviews"}
+
+    return {"message": "Database seeded successfully"}

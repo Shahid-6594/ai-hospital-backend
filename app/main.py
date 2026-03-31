@@ -24,12 +24,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(doctors.router)
-app.include_router(ai_search.router)
 app.include_router(auth.router)
 app.include_router(hospitals.router)
 app.include_router(services.router)
+app.include_router(doctors.router)
 app.include_router(appointments.router)
+app.include_router(ai_search.router)
 app.include_router(map.router)
 app.include_router(seed.router)
 app.include_router(debug.router)
@@ -38,5 +38,7 @@ app.include_router(debug.router)
 def home():
     return {"message": "AI hospital backend is running"}
 
-# Create tables
-models.Base.metadata.create_all(bind=engine)
+@app.on_event("startup")
+def startup():
+    print("Creating database tables...")
+    models.Base.metadata.create_all(bind=engine)
