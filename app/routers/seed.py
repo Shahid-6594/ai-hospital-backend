@@ -113,6 +113,7 @@ def seed_data(db: Session = Depends(get_db)):
        "City Hospital": 3.8,
        "Metro Hospital": 3.9
     }
+    print("Hospital count :",len(hospitals))
 
     for h in hospitals:
         # Check if review already exists
@@ -121,6 +122,7 @@ def seed_data(db: Session = Depends(get_db)):
         ).first()
 
         if not review_exists:
+            print("Adding reviews for :",h.name)
             rating_value = ratings_data.get(h.name, 4.0)
 
             new_review = models.Review(
